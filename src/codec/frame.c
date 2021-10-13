@@ -158,6 +158,14 @@ void ffw_frame_set_pts(AVFrame* frame, int64_t pts) {
     frame->pts = pts;
 }
 
+int ffw_frame_get_pict_type(const AVFrame* frame) {
+    return frame->pict_type;
+}
+
+void ffw_frame_set_pict_type(AVFrame* frame, int pict_type) {
+    frame->pict_type = pict_type;
+}
+
 AVFrame* ffw_frame_clone(const AVFrame* frame) {
     return av_frame_clone(frame);
 }

@@ -24,6 +24,8 @@ extern "C" {
     fn ffw_frame_get_height(frame: *const c_void) -> c_int;
     fn ffw_frame_get_pts(frame: *const c_void) -> i64;
     fn ffw_frame_set_pts(frame: *mut c_void, pts: i64);
+    fn ffw_frame_get_pict_type(frame: *const c_void) -> c_int;
+    fn ffw_frame_set_pict_type(frame: *mut c_void, pict_type: c_int);
     fn ffw_frame_get_plane_data(frame: *mut c_void, index: usize) -> *mut u8;
     fn ffw_frame_get_line_size(frame: *const c_void, plane: usize) -> usize;
     fn ffw_frame_get_line_count(frame: *const c_void, plane: usize) -> usize;
@@ -307,6 +309,55 @@ impl<'a> DerefMut for PlanesMut<'a> {
     }
 }
 
+pub enum PictureType {
+    /// Undefined
+    None,
+    /// Intra
+    I,
+    /// Predicted
+    P,
+    /// Bi-dir predicted
+    B,
+    /// S(GMC)-VOP MPEG-4
+    S,
+    /// Switching Intra
+    SI,
+    /// Switching Predicted
+    SP,
+    /// BI type
+    BI,
+}
+
+impl PictureType {
+    /// Get the internal raw representation.
+    fn into_raw(self) -> i32 {
+        match self {
+            PictureType::None => 0,
+            PictureType::I => 1,
+            PictureType::P => 2,
+            PictureType::B => 3,
+            PictureType::S => 4,
+            PictureType::SI => 5,
+            PictureType::SP => 6,
+            PictureType::BI => 7,
+        }
+    }
+
+    fn from_raw(pict_type: i32) -> PictureType {
+        match pict_type {
+            0 => PictureType::None,
+            1 => PictureType::I,
+            2 => PictureType::P,
+            3 => PictureType::B,
+            4 => PictureType::S,
+            5 => PictureType::SI,
+            6 => PictureType::SP,
+            7 => PictureType::BI,
+            _ => unreachable!(),
+        }
+    }
+}
+
 /// A video frame with mutable data.
 pub struct VideoFrameMut {
     ptr: *mut c_void,
@@ -474,6 +525,20 @@ impl VideoFrame {
         let pts = pts.with_time_base(self.time_base);
 
         unsafe { ffw_frame_set_pts(self.ptr, pts.timestamp()) }
+
+        self
+    }
+
+    /// Get picture type.
+    pub fn pict_type(&self) -> PictureType {
+        let pict_type = unsafe { ffw_frame_get_pict_type(self.ptr) };
+
+        PictureType::from_raw(pict_type)
+    }
+
+    /// Set picture type.
+    pub fn with_pict_type(self, pict_type: PictureType) -> Self {
+        unsafe { ffw_frame_set_pict_type(self.ptr, pict_type.into_raw()) }
 
         self
     }
