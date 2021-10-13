@@ -326,6 +326,8 @@ pub enum PictureType {
     SP,
     /// BI type
     BI,
+    /// Fallback type
+    Unsupported(i32),
 }
 
 impl PictureType {
@@ -340,6 +342,7 @@ impl PictureType {
             PictureType::SI => 5,
             PictureType::SP => 6,
             PictureType::BI => 7,
+            PictureType::Unsupported(raw) => raw,
         }
     }
 
@@ -353,7 +356,7 @@ impl PictureType {
             5 => PictureType::SI,
             6 => PictureType::SP,
             7 => PictureType::BI,
-            _ => unreachable!(),
+            raw => PictureType::Unsupported(raw),
         }
     }
 }
