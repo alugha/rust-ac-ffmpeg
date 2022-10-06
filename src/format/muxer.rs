@@ -19,13 +19,13 @@ extern "C" {
         short_name: *const c_char,
         file_name: *const c_char,
         mime_type: *const c_char,
-    ) -> *mut c_void;
+    ) -> *const c_void;
 
     fn ffw_muxer_new() -> *mut c_void;
     fn ffw_muxer_get_nb_streams(muxer: *const c_void) -> c_uint;
     fn ffw_muxer_get_stream(muxer: *mut c_void, stream_index: c_uint) -> *mut c_void;
     fn ffw_muxer_new_stream(muxer: *mut c_void, params: *const c_void) -> c_int;
-    fn ffw_muxer_init(muxer: *mut c_void, io_context: *mut c_void, format: *mut c_void) -> c_int;
+    fn ffw_muxer_init(muxer: *mut c_void, io_context: *mut c_void, format: *const c_void) -> c_int;
     fn ffw_muxer_set_initial_option(
         muxer: *mut c_void,
         key: *const c_char,
@@ -41,14 +41,14 @@ extern "C" {
     fn ffw_muxer_write_frame(
         muxer: *mut c_void,
         packet: *mut c_void,
-        tb_num: u32,
-        tb_den: u32,
+        tb_num: c_int,
+        tb_den: c_int,
     ) -> c_int;
     fn ffw_muxer_interleaved_write_frame(
         muxer: *mut c_void,
         packet: *mut c_void,
-        tb_num: u32,
-        tb_den: u32,
+        tb_num: c_int,
+        tb_den: c_int,
     ) -> c_int;
     fn ffw_muxer_free(muxer: *mut c_void) -> c_int;
 }
@@ -327,7 +327,7 @@ unsafe impl<T> Sync for Muxer<T> where T: Sync {}
 
 /// FFmpeg output format.
 pub struct OutputFormat {
-    ptr: *mut c_void,
+    ptr: *const c_void,
 }
 
 impl OutputFormat {
