@@ -100,6 +100,10 @@ int ffw_demuxer_init(Demuxer* demuxer, AVIOContext* avio_context, AVInputFormat*
     return ret;
 }
 
+void ffw_demuxer_set_io(Demuxer* demuxer, AVIOContext* avio_context) {
+    demuxer->fc->pb = avio_context;
+}
+
 int ffw_demuxer_set_initial_option(Demuxer* demuxer, const char* key, const char* value) {
     return av_dict_set(&demuxer->options, key, value, 0);
 }

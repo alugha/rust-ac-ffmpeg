@@ -24,6 +24,8 @@ extern "C" {
         seek: Option<SeekCallback>,
     ) -> *mut c_void;
     fn ffw_io_context_free(context: *mut c_void);
+
+    fn ffw_io_context_set_write_flag(ctx: *mut c_void, write_flag: c_int);
 }
 
 /// IO context.
@@ -227,6 +229,12 @@ impl<T> IO<T> {
     pub fn into_stream(self) -> T {
         *self.stream
     }
+
+    pub fn set_writable(&mut self, is_writable: bool) {
+        unsafe {
+            ffw_io_context_set_write_flag(self.io_context.ptr, if is_writable { 1 } else { 0 })
+        }
+    }
 }
 
 impl<T> IO<T>
@@ -266,6 +274,21 @@ where
     /// Create a new IO from a given stream.
     pub fn from_seekable_write_stream(stream: T) -> Self {
         Self::new(stream, None, Some(io_write_packet::<T>), Some(io_seek::<T>))
+    }
+}
+
+impl<T> IO<T>
+where
+    T: Read + Write,
+{
+    /// Create a new IO from a given stream.
+    pub fn from_read_write_stream(stream: T) -> Self {
+        Self::new(
+            stream,
+            Some(io_read_packet::<T>),
+            Some(io_write_packet::<T>),
+            None,
+        )
     }
 }
 

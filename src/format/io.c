@@ -49,3 +49,7 @@ void ffw_io_context_free(AVIOContext* context) {
 
     avio_context_free(&context);
 }
+
+void ffw_io_context_set_write_flag(AVIOContext* ctx, int write_flag) {
+    ctx->write_flag = write_flag;
+}

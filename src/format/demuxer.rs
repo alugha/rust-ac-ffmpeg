@@ -31,6 +31,7 @@ extern "C" {
         io_context: *mut c_void,
         format: *mut c_void,
     ) -> c_int;
+    fn ffw_demuxer_set_io(demuxer: *mut c_void, io_context: *mut c_void);
     fn ffw_demuxer_set_initial_option(
         demuxer: *mut c_void,
         key: *const c_char,
@@ -340,6 +341,14 @@ impl<T> Demuxer<T> {
     /// Get mutable reference to the underlying IO.
     pub fn io_mut(&mut self) -> &mut IO<T> {
         &mut self.io
+    }
+
+    pub fn set_io(&mut self, mut io: IO<T>) {
+        let io_context_ptr = io.io_context_mut().as_mut_ptr();
+        unsafe {
+            ffw_demuxer_set_io(self.ptr, io_context_ptr);
+        }
+        self.io = io;
     }
 }
 
